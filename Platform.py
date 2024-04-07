@@ -42,11 +42,19 @@ def load_sprite_sheets(dir, width, height, direction=False):
     
     return all_sprites
 
-def get_block(size, temp1, temp2):
+def get_block(size1, size2, temp1, temp2):
     path = join("assets", "Terrain.png")
     image = pygame.image.load(path).convert_alpha()
+    surface = pygame.Surface((size1, size2), pygame.SRCALPHA, 32)
+    rect = pygame.Rect(temp1, temp2, size1, size2) 
+    surface.blit(image, (0,0), rect)
+    return pygame.transform.scale2x(surface)
+
+def get_door(size, temp1, temp2):
+    path = join("assets", "Door.png")
+    image = pygame.image.load(path).convert_alpha()
     surface = pygame.Surface((size, size), pygame.SRCALPHA, 32)
-    rect = pygame.Rect(temp1, temp2, size, size) 
+    rect = pygame.Rect(temp1,temp2 ,size, size) 
     surface.blit(image, (0,0), rect)
     return pygame.transform.scale2x(surface)
 
@@ -74,7 +82,6 @@ class Player(pygame.sprite.Sprite):
         if self.jump_count == 1:
             self.fall_count = 0
 
-    
     def move(self, dx, dy): #move in direction 
         self.rect.x += dx #direction x
         self.rect.y += dy #direction y
@@ -146,10 +153,17 @@ class Object(pygame.sprite.Sprite):
         win.blit(self.image, (self.rect.x - offset_x, self.rect.y))
 
 class Block(Object):
+    def __init__(self, x, y, size1, size2, temp1, temp2):
+        super().__init__(x, y, size1, size2)
+        block = get_block(size1, size2, temp1, temp2)
+        self.image.blit(block, (0, 0))
+        self.mask = pygame.mask.from_surface(self.image)
+
+class Door(Object):
     def __init__(self, x, y, size, temp1, temp2):
         super().__init__(x, y, size, size)
-        block = get_block(size, temp1, temp2)
-        self.image.blit(block, (0, 0))
+        door = get_door(size, temp1, temp2)
+        self.image.blit(door, (0,0))
         self.mask = pygame.mask.from_surface(self.image)
 
 def get_background(name):
@@ -179,11 +193,11 @@ def draw(window, background, bg_image, player, objects, offset_x):
 def handle_vertical_collision(player, objects, dy):
     collided_objects = []
     for obj in objects:
-        if pygame.sprite.collide_mask(player, obj):
+        if pygame.sprite.collide_mask(player, obj) and type(obj) != Door:
             if dy > 0:
                 player.rect.bottom = obj.rect.top
                 player.landed()
-            elif dy < 0:
+            elif dy < 0 and type(obj) != Door:
                 player.rect.top = obj.rect.bottom
                 player.hit_head()
 
@@ -196,15 +210,23 @@ def collide(player, objects, dx):
     player.update()
     collided_object = None
     for obj in objects:
-        if pygame.sprite.collide_mask(player, obj):
+        if pygame.sprite.collide_mask(player, obj) and type(obj) != Door:
             collided_object = obj
             break
-
     player.move(-dx, 0)
     player.update()
     return collided_object
 
-
+def doorTouch(player, objects):
+    keys = pygame.key.get_pressed()
+    for obj in objects:
+        if pygame.sprite.collide_mask(player, obj) and type(obj) == Door:
+            if keys[pygame.K_UP]:
+                obj.kill()
+                objects.append(Door(12 * 96, (HEIGHT - 96) - 64, 64, 32, 0))
+            break
+    
+            
 def handle_move(player, objects):
     keys = pygame.key.get_pressed()
 
@@ -230,10 +252,9 @@ def handle_move(player, objects):
 def main(window):
     clock = pygame.time.Clock()
     background, bg_image = get_background("Background.png")
-
     block_size = 96
 
-    player = Player(100, 100, 50, 50) #posx, posy, size, size
+    player = Player(100, 500, 50, 50) #posx, posy, size, size
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
     #Block Positions, For some you need to be more precise.
     #(0,0) = Stone bricks | (0, 64) = Wood planks | (0, 128) = Scales
@@ -243,13 +264,30 @@ def main(window):
 
     #When Creating a new Block() The Params are (X pos, Y Pos, Size(Square Shape), Terrain.png x value, Terrain.png y value as shown above)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
-    floor = [Block(i* block_size, HEIGHT - block_size, block_size, 96, 128) 
-             for i in range(-WIDTH // block_size, WIDTH * 2 // block_size)]
-    
-    objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size, 0,0), Block(block_size * 3, HEIGHT - block_size * 4, block_size, 0, 64)]
+
+    objects = []
+    for i in range(0, 15):
+        objects.append(Block(i * block_size, HEIGHT - block_size, block_size, block_size, 0, 0),) #Floor
+    for i in range(2, 9):
+        objects.append(Block(0, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Left Wall
+    for i in range(1, 15):
+        objects.append(Block(i * block_size, HEIGHT - block_size * 8, block_size, block_size, 0, 0),) #Roof
+    for i in range(2, 9):
+        objects.append(Block(14 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Right Wall
+
+    objects.append(Block(3 * block_size, (HEIGHT - block_size * 3) + 100, 96, 34, 192, 64)) #Grey Poly Brick Straight
+    objects.append(Block(5 * block_size, (HEIGHT - block_size * 3) + 60, 96, 34, 192, 64)) #Grey Poly Brick Straight
+    objects.append(Block(8 * block_size, (HEIGHT - block_size * 3) + 10, 96, 34, 192, 64)) #Grey Poly Brick Straight
+    objects.append(Block(5.7 * block_size, (HEIGHT - block_size * 3) - 140, 96, 34, 192, 64)) #Grey Poly Brick Straight
+    objects.append(Block(3 * block_size, (HEIGHT - block_size * 3) - 180, 96, 34, 192, 64)) #Grey Poly Brick Straight
+
+    doorAppear = False
+    objects.append(Door(12 * block_size, (HEIGHT - block_size) - 64, 64, 0, 0))
+    doorAppear = True
+
     
     offset_x = 0
-    scroll_area_width = 200
+    scroll_area_width = 100
 
 
     run = True
@@ -262,12 +300,13 @@ def main(window):
                 break
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP and player.jump_count < 2:
+                if event.key == pygame.K_SPACE and player.jump_count < 2:
                     player.jump()
 
             
         player.loop(FPS)
         handle_move(player, objects)
+        doorTouch(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)      
 
         if((player.rect.right - offset_x >= WIDTH - scroll_area_width and player.x_vel > 0)) or ((player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
