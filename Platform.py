@@ -17,7 +17,6 @@ window = pygame.display.set_mode((WIDTH, HEIGHT))
 def flip(sprites):
     return [pygame.transform.flip(sprite, True, False) for sprite in sprites] #Flip x direction but not y
 
-
 def load_sprite_sheets(dir, width, height, direction=False):
     path = join("assets", dir) 
     images = [f for f in listdir(path) if isfile(join(path, f))] 
@@ -166,6 +165,29 @@ class Door(Object):
         self.image.blit(door, (0,0))
         self.mask = pygame.mask.from_surface(self.image)
 
+class Pill(Object):
+    ANIMATION_DELAY = 12
+
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width, height, "pill")
+        self.pill = load_sprite_sheets("Pills", width, height, False)
+        self.image = self.pill["idle"][0]
+        self.mask = pygame.mask.from_surface(self.image)
+        self.animation_count = 0
+
+    def loop(self):
+        sprites = self.pill["idle"]
+        sprite_index = (self.animation_count // self.ANIMATION_DELAY) % len(sprites)
+        self.image = sprites[sprite_index]
+        self.animation_count += 1
+
+        self.rect = self.image.get_rect(topleft =(self.rect.x, self.rect.y))
+        self.mask = pygame.mask.from_surface(self.image)
+
+        if self.animation_count // self.ANIMATION_DELAY > len(sprites):
+            self.animation_count = 0
+
+
 def get_background(name):
     image = pygame.image.load(join("assets", name))
     _, _, width, height = image.get_rect()
@@ -193,14 +215,14 @@ def draw(window, background, bg_image, player, objects, offset_x):
 def handle_vertical_collision(player, objects, dy):
     collided_objects = []
     for obj in objects:
-        if pygame.sprite.collide_mask(player, obj) and type(obj) != Door:
+        if pygame.sprite.collide_mask(player, obj) and type(obj) != Door and type(obj) != Pill:
             if dy > 0:
                 player.rect.bottom = obj.rect.top
                 player.landed()
-            elif dy < 0 and type(obj) != Door:
+            elif dy < 0 and type(obj) != Door and type(obj) != Pill:
                 player.rect.top = obj.rect.bottom
                 player.hit_head()
-
+ 
         collided_objects.append(obj)
     
     return collided_objects
@@ -210,7 +232,7 @@ def collide(player, objects, dx):
     player.update()
     collided_object = None
     for obj in objects:
-        if pygame.sprite.collide_mask(player, obj) and type(obj) != Door:
+        if pygame.sprite.collide_mask(player, obj) and type(obj) != Door and type(obj) != Pill:
             collided_object = obj
             break
     player.move(-dx, 0)
@@ -225,6 +247,13 @@ def doorTouch(player, objects):
                 obj.kill()
                 objects.append(Door(12 * 96, (HEIGHT - 96) - 64, 64, 32, 0))
             break
+
+def pillTouch(player, objects):
+    for obj in objects:
+        if pygame.sprite.collide_mask(player, obj) and type(obj) == Pill:
+                objects.remove(obj)
+                objects.append(Door(12 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
+                break
     
             
 def handle_move(player, objects):
@@ -266,6 +295,7 @@ def main(window):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     objects = []
+    pill = Pill((3 * block_size) + 18, (HEIGHT - block_size * 3) - 250, 32, 32)
     for i in range(0, 15):
         objects.append(Block(i * block_size, HEIGHT - block_size, block_size, block_size, 0, 0),) #Floor
     for i in range(2, 9):
@@ -275,16 +305,12 @@ def main(window):
     for i in range(2, 9):
         objects.append(Block(14 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Right Wall
 
-    objects.append(Block(3 * block_size, (HEIGHT - block_size * 3) + 100, 96, 34, 192, 64)) #Grey Poly Brick Straight
-    objects.append(Block(5 * block_size, (HEIGHT - block_size * 3) + 60, 96, 34, 192, 64)) #Grey Poly Brick Straight
-    objects.append(Block(8 * block_size, (HEIGHT - block_size * 3) + 10, 96, 34, 192, 64)) #Grey Poly Brick Straight
-    objects.append(Block(5.7 * block_size, (HEIGHT - block_size * 3) - 140, 96, 34, 192, 64)) #Grey Poly Brick Straight
-    objects.append(Block(3 * block_size, (HEIGHT - block_size * 3) - 180, 96, 34, 192, 64)) #Grey Poly Brick Straight
-
-    doorAppear = False
-    objects.append(Door(12 * block_size, (HEIGHT - block_size) - 64, 64, 0, 0))
-    doorAppear = True
-
+    objects.append(Block(3 * block_size, (HEIGHT - block_size * 3) + 100, 96, 34, 192, 64),) #Grey Poly Brick Straight
+    objects.append(Block(5 * block_size, (HEIGHT - block_size * 3) + 60, 96, 34, 192, 64),) #Grey Poly Brick Straight
+    objects.append(Block(8 * block_size, (HEIGHT - block_size * 3) + 10, 96, 34, 192, 64),) #Grey Poly Brick Straight
+    objects.append(Block(5.7 * block_size, (HEIGHT - block_size * 3) - 140, 96, 34, 192, 64),) #Grey Poly Brick Straight
+    objects.append(Block(3 * block_size, (HEIGHT - block_size * 3) - 180, 96, 34, 192, 64),) #Grey Poly Brick Straight
+    objects.append(pill,)
     
     offset_x = 0
     scroll_area_width = 100
@@ -305,8 +331,10 @@ def main(window):
 
             
         player.loop(FPS)
+        pill.loop()
         handle_move(player, objects)
         doorTouch(player, objects)
+        pillTouch(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)      
 
         if((player.rect.right - offset_x >= WIDTH - scroll_area_width and player.x_vel > 0)) or ((player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
