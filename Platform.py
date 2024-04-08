@@ -6,7 +6,7 @@ from os import listdir
 from os.path import isfile, join
 pygame.init()
 
-pygame.display.set_caption("Platform Game") #name of the window
+pygame.display.set_caption("Schizophrenia Lvl 1") #name of the window
 
 WIDTH, HEIGHT = 1400, 700 #window size
 FPS = 60 #fps
@@ -326,8 +326,15 @@ def main(window):
                 break
 
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    run = False
+                    break
+
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and player.jump_count < 2:
                     player.jump()
+            
+
 
             
         player.loop(FPS)
