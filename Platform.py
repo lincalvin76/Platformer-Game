@@ -6,7 +6,8 @@ from os import listdir
 from os.path import isfile, join
 pygame.init()
 
-pygame.display.set_caption("Schizophrenia Lvl 1") #name of the window
+pygame.display.set_caption("Schizophrenia Lvl 1") #name of the window (initial)
+level = 1
 
 WIDTH, HEIGHT = 1400, 700 #window size
 FPS = 60 #fps
@@ -187,6 +188,11 @@ class Pill(Object):
         if self.animation_count // self.ANIMATION_DELAY > len(sprites):
             self.animation_count = 0
 
+    def move(self, dx, dy):
+        self.rect.x = dx
+        self.rect.y = dy
+        print(self.rect.y)
+
 
 def get_background(name):
     image = pygame.image.load(join("assets", name))
@@ -201,12 +207,14 @@ def get_background(name):
     return tiles, image
 
 
-def draw(window, background, bg_image, player, objects, offset_x):
+def draw(window, background, bg_image, player, objects, pill, offset_x):
     for tile in background:
         window.blit(bg_image, tile)
 
     for obj in objects:
         obj.draw(window, offset_x)
+
+    pill.draw(window, offset_x)
 
     player.draw(window, offset_x)
 
@@ -239,21 +247,40 @@ def collide(player, objects, dx):
     player.update()
     return collided_object
 
-def doorTouch(player, objects):
+def levelChange(player, pill, objects):
+    player.move(-1000,0)
+    objects.clear()
+    block_size = 96
+    if level == 2:
+        pygame.display.set_caption("Schizophrenia Lvl 2")
+        for i in range(0, 15):
+            objects.append(Block(i * block_size, HEIGHT - block_size, block_size, block_size, 0, 0),) #Floor
+        for i in range(2, 9):
+            objects.append(Block(0, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Left Wall
+        for i in range(1, 15):
+            objects.append(Block(i * block_size, HEIGHT - block_size * 8, block_size, block_size, 0, 0),) #Roof
+        for i in range(2, 9):
+            objects.append(Block(14 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Right Wall
+        pill.move(320, 30)
+    
+
+def doorTouch(player, pill, objects):
     keys = pygame.key.get_pressed()
     for obj in objects:
         if pygame.sprite.collide_mask(player, obj) and type(obj) == Door:
             if keys[pygame.K_UP]:
                 obj.kill()
                 objects.append(Door(12 * 96, (HEIGHT - 96) - 64, 64, 32, 0))
+                global level
+                level += 1
+                levelChange(player, pill, objects)
             break
 
-def pillTouch(player, objects):
-    for obj in objects:
-        if pygame.sprite.collide_mask(player, obj) and type(obj) == Pill:
-                objects.remove(obj)
-                objects.append(Door(12 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
-                break
+def pillTouch(player, pill, objects):
+    if pygame.sprite.collide_mask(player, pill):
+        #objects.remove(obj)
+        pill.move(306, -60)
+        objects.append(Door(12 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
     
             
 def handle_move(player, objects):
@@ -276,7 +303,8 @@ def handle_move(player, objects):
                 player.move_left(PLAYER_VEL)
 
     handle_vertical_collision(player, objects, player.y_vel)
-    
+
+
 
 def main(window):
     clock = pygame.time.Clock()
@@ -295,7 +323,7 @@ def main(window):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     objects = []
-    pill = Pill((3 * block_size) + 18, (HEIGHT - block_size * 3) - 250, 32, 32)
+    pill = Pill(306, 162, 32, 32)
     for i in range(0, 15):
         objects.append(Block(i * block_size, HEIGHT - block_size, block_size, block_size, 0, 0),) #Floor
     for i in range(2, 9):
@@ -310,7 +338,6 @@ def main(window):
     objects.append(Block(8 * block_size, (HEIGHT - block_size * 3) + 10, 96, 34, 192, 64),) #Grey Poly Brick Straight
     objects.append(Block(5.7 * block_size, (HEIGHT - block_size * 3) - 140, 96, 34, 192, 64),) #Grey Poly Brick Straight
     objects.append(Block(3 * block_size, (HEIGHT - block_size * 3) - 180, 96, 34, 192, 64),) #Grey Poly Brick Straight
-    objects.append(pill,)
     
     offset_x = 0
     scroll_area_width = 100
@@ -340,9 +367,9 @@ def main(window):
         player.loop(FPS)
         pill.loop()
         handle_move(player, objects)
-        doorTouch(player, objects)
-        pillTouch(player, objects)
-        draw(window, background, bg_image, player, objects, offset_x)      
+        doorTouch(player, pill, objects)
+        pillTouch(player, pill, objects)
+        draw(window, background, bg_image, player, objects, pill, offset_x)      
 
         if((player.rect.right - offset_x >= WIDTH - scroll_area_width and player.x_vel > 0)) or ((player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
             offset_x += player.x_vel  
