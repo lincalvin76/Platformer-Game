@@ -248,10 +248,10 @@ def collide(player, objects, dx):
     return collided_object
 
 def levelChange(player, pill, objects):
-    player.move(-1000,0)
     objects.clear()
     block_size = 96
     if level == 2:
+        player.move(-1000,0)
         pygame.display.set_caption("Schizophrenia Lvl 2")
         for i in range(0, 15):
             objects.append(Block(i * block_size, HEIGHT - block_size, block_size, block_size, 0, 0),) #Floor
@@ -261,8 +261,60 @@ def levelChange(player, pill, objects):
             objects.append(Block(i * block_size, HEIGHT - block_size * 8, block_size, block_size, 0, 0),) #Roof
         for i in range(2, 9):
             objects.append(Block(14 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Right Wall
-        pill.move(320, 30)
-    
+        for i in range(2,6):
+            objects.append(Block(6 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Middle Wall
+        for i in range(7,9):
+            objects.append(Block(6 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Middle Wall
+
+        objects.append(Block(4 * block_size, (HEIGHT - block_size * 3) + 50, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(1 * block_size, (HEIGHT - block_size * 3) + 0, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(2 * block_size, (HEIGHT - block_size * 3) - 200, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(7.5 * block_size, (HEIGHT - block_size * 3) - 100, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(9 * block_size, (HEIGHT - block_size * 3) + 100, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(10 * block_size, (HEIGHT - block_size * 3) - 150, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(12 * block_size, (HEIGHT - block_size * 3) - 300, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        pill.move(1175, 45)
+    if level == 3:
+        player.move(10,0)
+        pygame.display.set_caption("Schizophrenia Lvl 3")
+        for i in range(0, 15):
+            objects.append(Block(i * block_size, HEIGHT - block_size, block_size, block_size, 0, 0),) #Floor
+        for i in range(2, 9):
+            objects.append(Block(0, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Left Wall
+        for i in range(1, 15):
+            objects.append(Block(i * block_size, HEIGHT - block_size * 8, block_size, block_size, 0, 0),) #Roof
+        for i in range(2, 9):
+            objects.append(Block(14 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Right Wall
+        for i in range(2,3):
+            objects.append(Block(3 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Middle Wall
+        for i in range(4,9):
+            objects.append(Block(3 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Middle Wall
+        for i in range(2,5):
+            objects.append(Block(6 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Middle Wall
+        for i in range(6,9):
+            objects.append(Block(6 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Middle Wall
+        for i in range(2,7):
+            objects.append(Block(9 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Middle Wall
+        for i in range(8,9):
+            objects.append(Block(9 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Middle Wall
+
+        objects.append(Block(8 * block_size, (HEIGHT - block_size * 3) + 50, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(11 * block_size, (HEIGHT - block_size * 3) + 0, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(13 * block_size, (HEIGHT - block_size * 3) - 200, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(10 * block_size, (HEIGHT - block_size * 3) - 150, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        pill.move(1265, 140)
+    if level == 4:
+        player.move(100,0)
+        pygame.display.set_caption("Schizophrenia Lvl 4")
+        for i in range(0, 15):
+            objects.append(Block(i * block_size, HEIGHT - block_size, block_size, block_size, 0, 0),) #Floor
+        for i in range(2, 9):
+            objects.append(Block(0, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Left Wall
+        for i in range(1, 15):
+            objects.append(Block(i * block_size, HEIGHT - block_size * 8, block_size, block_size, 0, 0),) #Roof
+        for i in range(2, 9):
+            objects.append(Block(14 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Right Wall
+
 
 def doorTouch(player, pill, objects):
     keys = pygame.key.get_pressed()
@@ -280,7 +332,12 @@ def pillTouch(player, pill, objects):
     if pygame.sprite.collide_mask(player, pill):
         #objects.remove(obj)
         pill.move(306, -60)
-        objects.append(Door(12 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
+        if level == 1:
+            objects.append(Door(12 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
+        if level == 2:
+            objects.append(Door(2 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
+        if level == 3:
+            objects.append(Door(1 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
     
             
 def handle_move(player, objects):
