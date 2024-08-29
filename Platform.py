@@ -4,10 +4,17 @@ import random
 import math
 from os import listdir
 from os.path import isfile, join
+from pygame import mixer
 pygame.init()
 
 pygame.display.set_caption("Schizophrenia Lvl 1") #name of the window (initial)
 level = 1
+
+#Background Music
+mixer.music.load("assets/bgm.mp3")
+mixer.music.set_volume(0.1)
+mixer.music.play(-1)
+
 
 WIDTH, HEIGHT = 1400, 700 #window size
 FPS = 60 #fps
@@ -191,7 +198,6 @@ class Pill(Object):
     def move(self, dx, dy):
         self.rect.x = dx
         self.rect.y = dy
-        print(self.rect.y)
 
 
 def get_background(name):
@@ -313,7 +319,31 @@ def levelChange(player, pill, objects):
         for i in range(1, 15):
             objects.append(Block(i * block_size, HEIGHT - block_size * 8, block_size, block_size, 0, 0),) #Roof
         for i in range(2, 9):
-            objects.append(Block(14 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Right Wall
+            objects.append(Block(14 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Right Wall  
+        
+        for i in range(3,6):
+            objects.append(Block(4 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Middle Wall
+        for i in range(7,9):
+            objects.append(Block(4 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Middle Wall
+        for i in range(6,9):
+            objects.append(Block(i * block_size, HEIGHT - block_size * 3, block_size, block_size, 0, 0),) #Horizontal Wall
+        for i in range(6,9):
+            objects.append(Block(i * block_size, HEIGHT - block_size * 2, block_size, block_size, 0, 0),) #Horizontal Wall
+        for i in range(11,13):
+            objects.append(Block(i * block_size, HEIGHT - block_size * 3, block_size, block_size, 0, 0),) #Horizontal Wall
+        for i in range(5,13):
+            objects.append(Block(i * block_size, HEIGHT - block_size * 5, block_size, block_size, 0, 0),) #Horizontal Wall
+        for i in range(3,8):
+            objects.append(Block(10 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Middle Wall
+
+        objects.append(Block(6 * block_size, HEIGHT - block_size * 6, block_size, block_size, 0, 0),) #Brick
+        objects.append(Block(8 * block_size, HEIGHT - block_size * 7, block_size, block_size, 0, 0),) #Brick
+        objects.append(Block(1 * block_size, (HEIGHT - block_size * 3) + 50, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(1 * block_size, (HEIGHT - block_size * 3) - 150, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(4 * block_size, HEIGHT - block_size * 2, block_size, block_size, 0, 0),) #Delete Block
+
+        pill.move(880, 40)
+
 
 
 def doorTouch(player, pill, objects):
@@ -331,6 +361,8 @@ def doorTouch(player, pill, objects):
 def pillTouch(player, pill, objects):
     if pygame.sprite.collide_mask(player, pill):
         #objects.remove(obj)
+        gulp_sound = mixer.Sound("assets/gulp.mp3")
+        gulp_sound.play()
         pill.move(306, -60)
         if level == 1:
             objects.append(Door(12 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
@@ -338,6 +370,9 @@ def pillTouch(player, pill, objects):
             objects.append(Door(2 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
         if level == 3:
             objects.append(Door(1 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
+        if level == 4:
+            objects.append(Door(11 * 96, (HEIGHT - 96) - 446, 64, 0, 0))
+            objects.remove(objects[-2])
     
             
 def handle_move(player, objects):
@@ -416,6 +451,8 @@ def main(window):
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and player.jump_count < 2:
+                    jump_sound = mixer.Sound("assets/jump.mp3")
+                    jump_sound.play()
                     player.jump()
             
 
