@@ -5,6 +5,7 @@ import math
 from os import listdir
 from os.path import isfile, join
 from pygame import mixer
+pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.init()
 
 pygame.display.set_caption("Schizophrenia Lvl 1") #name of the window (initial)
@@ -351,6 +352,8 @@ def doorTouch(player, pill, objects):
     for obj in objects:
         if pygame.sprite.collide_mask(player, obj) and type(obj) == Door:
             if keys[pygame.K_UP]:
+                door_sound = mixer.Sound("assets/door.mp3")
+                door_sound.play()
                 obj.kill()
                 objects.append(Door(12 * 96, (HEIGHT - 96) - 64, 64, 32, 0))
                 global level
@@ -372,6 +375,8 @@ def pillTouch(player, pill, objects):
             objects.append(Door(1 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
         if level == 4:
             objects.append(Door(11 * 96, (HEIGHT - 96) - 446, 64, 0, 0))
+            rock_sound = mixer.Sound("assets/rock.mp3")
+            rock_sound.play()
             objects.remove(objects[-2])
     
             
