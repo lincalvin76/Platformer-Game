@@ -10,12 +10,12 @@ pygame.init()
 
 pygame.display.set_caption("Schizophrenia Lvl 1") #name of the window (initial)
 level = 1
+finished = 0
 
 #Background Music
 mixer.music.load("assets/bgm.mp3")
 mixer.music.set_volume(0.1)
 mixer.music.play(-1)
-
 
 WIDTH, HEIGHT = 1400, 700 #window size
 FPS = 60 #fps
@@ -145,8 +145,8 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.sprite.get_rect(topleft =(self.rect.x, self.rect.y))
         self.mask = pygame.mask.from_surface(self.sprite)
 
-    def draw(self, win, offset_x): #draw player
-        win.blit(self.sprite, (self.rect.x - offset_x, self.rect.y))
+    def draw(self, win, offset_x, offset_y): #draw player
+        win.blit(self.sprite, (self.rect.x - offset_x, self.rect.y - offset_y))
 
 class Object(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, name=None):
@@ -157,8 +157,8 @@ class Object(pygame.sprite.Sprite):
         self.height = height
         self.name = name
 
-    def draw(self, win, offset_x):
-        win.blit(self.image, (self.rect.x - offset_x, self.rect.y))
+    def draw(self, win, offset_x, offset_y):
+        win.blit(self.image, (self.rect.x - offset_x, self.rect.y - offset_y))
 
 class Block(Object):
     def __init__(self, x, y, size1, size2, temp1, temp2):
@@ -214,16 +214,16 @@ def get_background(name):
     return tiles, image
 
 
-def draw(window, background, bg_image, player, objects, pill, offset_x):
+def draw(window, background, bg_image, player, objects, pill, offset_x, offset_y):
     for tile in background:
         window.blit(bg_image, tile)
 
     for obj in objects:
-        obj.draw(window, offset_x)
+        obj.draw(window, offset_x, offset_y)
 
-    pill.draw(window, offset_x)
+    pill.draw(window, offset_x, offset_y)
 
-    player.draw(window, offset_x)
+    player.draw(window, offset_x, offset_y)
 
     pygame.display.update()
 
@@ -254,9 +254,15 @@ def collide(player, objects, dx):
     player.update()
     return collided_object
 
+def draw_text(text, font, color):
+    box = font.render(text, True, color)
+    window.blit(box, box.get_rect(center = window.get_rect().center))
+    pygame.display.flip()
+
 def levelChange(player, pill, objects):
     objects.clear()
     block_size = 96
+
     if level == 2:
         player.move(-1000,0)
         pygame.display.set_caption("Schizophrenia Lvl 2")
@@ -281,6 +287,7 @@ def levelChange(player, pill, objects):
         objects.append(Block(10 * block_size, (HEIGHT - block_size * 3) - 150, 96, 34, 192, 64),) #Grey Poly Brick Straight
         objects.append(Block(12 * block_size, (HEIGHT - block_size * 3) - 300, 96, 34, 192, 64),) #Grey Poly Brick Straight
         pill.move(1175, 45)
+
     if level == 3:
         player.move(10,0)
         pygame.display.set_caption("Schizophrenia Lvl 3")
@@ -310,6 +317,7 @@ def levelChange(player, pill, objects):
         objects.append(Block(13 * block_size, (HEIGHT - block_size * 3) - 200, 96, 34, 192, 64),) #Grey Poly Brick Straight
         objects.append(Block(10 * block_size, (HEIGHT - block_size * 3) - 150, 96, 34, 192, 64),) #Grey Poly Brick Straight
         pill.move(1265, 140)
+
     if level == 4:
         player.move(100,0)
         pygame.display.set_caption("Schizophrenia Lvl 4")
@@ -342,8 +350,82 @@ def levelChange(player, pill, objects):
         objects.append(Block(1 * block_size, (HEIGHT - block_size * 3) + 50, 96, 34, 192, 64),) #Grey Poly Brick Straight
         objects.append(Block(1 * block_size, (HEIGHT - block_size * 3) - 150, 96, 34, 192, 64),) #Grey Poly Brick Straight
         objects.append(Block(4 * block_size, HEIGHT - block_size * 2, block_size, block_size, 0, 0),) #Delete Block
-
         pill.move(880, 40)
+
+    if level == 5:
+        mixer.music.stop()
+        mixer.music.load("assets/final_music.mp3")
+        mixer.music.set_volume(0.5)
+        mixer.music.play(-1)
+        player.move(-900 , 400)
+        pygame.display.set_caption("Reach the top.. Wake up.")
+        for i in range(0, 15):
+            objects.append(Block(i * block_size, HEIGHT - block_size, block_size, block_size, 0, 0),) #Floor
+        for i in range(2, 30):
+            objects.append(Block(0, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Left Wall
+        for i in range(1, 15):
+            objects.append(Block(i * block_size, HEIGHT - block_size * 29, block_size, block_size, 0, 0),) #Roof
+        for i in range(2, 30):
+            objects.append(Block(14 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) #Right Wall  
+
+        objects.append(Door(13.18 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
+
+        objects.append(Block(1 * block_size, (HEIGHT - block_size * 3) + 50, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(3 * block_size, (HEIGHT - block_size * 3) - 100, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(1 * block_size, (HEIGHT - block_size * 3) - 250, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(4 * block_size, (HEIGHT - block_size * 3) - 350, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(9 * block_size, (HEIGHT - block_size * 3) - 370, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(5 * block_size, (HEIGHT - block_size * 3) - 580, 96, 34, 192, 64),) #Grey Poly Brick Straight
+
+        for i in range(1,5):
+            objects.append(Block(i * block_size, (HEIGHT - block_size * 3) - 600, block_size, block_size, 0, 0),) #Horizontal Wall
+        for i in range(10, 16):
+            objects.append(Block(10 * block_size, HEIGHT - block_size * i, block_size, block_size, 0, 0),) # Wall
+        for i in range(1,4):
+            objects.append(Block(i * block_size, (HEIGHT - block_size * 3) - 680, block_size, block_size, 0, 0),) #Horizontal Wall
+        for i in range(1,3):
+            objects.append(Block(i * block_size, (HEIGHT - block_size * 3) - 760, block_size, block_size, 0, 0),) #Horizontal Wall
+
+        objects.append(Block(1 * block_size, (HEIGHT - block_size * 3) - 840, block_size, block_size, 0, 0),) #Horizontal Wall
+        objects.append(Block(4 * block_size, HEIGHT - block_size * 12, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(9 * block_size, HEIGHT - block_size * 12, 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(9 * block_size, (HEIGHT - block_size * 14), 96, 34, 192, 64),) #Grey Poly Brick Straight
+
+        objects.append(Block(6 * block_size, HEIGHT - block_size * 17, block_size, block_size, 0, 0),) #Block
+        objects.append(Block(6 * block_size, HEIGHT - block_size * 19, block_size, block_size, 0, 0),) #Block
+        objects.append(Block(4 * block_size, HEIGHT - block_size * 18, block_size, block_size, 0, 0),) #Block
+        objects.append(Block(4 * block_size, HEIGHT - block_size * 20, block_size, block_size, 0, 0),) #Block
+
+        objects.append(Block(1 * block_size, (HEIGHT - block_size * 22), 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(3 * block_size, (HEIGHT - block_size * 24), 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(6 * block_size, (HEIGHT - block_size * 25), 96, 34, 192, 64),) #Grey Poly Brick Straight
+        for i in range(1,3):
+            objects.append(Block(i * block_size, (HEIGHT - block_size * 27), block_size, block_size, 0, 0),) #Horizontal Wall
+        for i in range(4,10):
+            objects.append(Block(i * block_size, (HEIGHT - block_size * 27), block_size, block_size, 0, 0),) #Horizontal Wall
+        objects.append(Block(7 * block_size, HEIGHT - block_size * 27, block_size, block_size, 0, 0),) #Block
+        objects.append(Block(8 * block_size, HEIGHT - block_size * 27, block_size, block_size, 0, 0),) #Block
+        objects.append(Block(9 * block_size, (HEIGHT - block_size * 24), 96, 34, 192, 64),) #Grey Poly Brick Straight
+        objects.append(Block(13 * block_size, (HEIGHT - block_size * 25), 96, 34, 192, 64),) #Grey Poly Brick Straight
+
+        objects.append(Block(12 * block_size, HEIGHT - block_size * 2, block_size, block_size, 0, 0),) #Block
+        objects.append(Block(12 * block_size, HEIGHT - block_size * 3, block_size, block_size, 0, 0),) #Block
+        objects.append(Block(13 * block_size, HEIGHT - block_size * 3, block_size, block_size, 0, 0),) #Block
+
+        pill.move(110, -1975)
+    
+    #end of levels
+    if level == 6:
+        mixer.music.stop()
+        mixer.music.load("assets/end.mp3")
+        mixer.music.set_volume(0.5)
+        mixer.music.play(-1)
+        pygame.display.set_caption("Schizophrenia End")
+        window.fill("black")
+        text_font = pygame.font.Font('assets/font.otf', 36)
+        global finished
+        finished += 1
+        draw_text("Thank you for playing", text_font, (255, 255, 255))
 
 
 
@@ -353,6 +435,7 @@ def doorTouch(player, pill, objects):
         if pygame.sprite.collide_mask(player, obj) and type(obj) == Door:
             if keys[pygame.K_UP]:
                 door_sound = mixer.Sound("assets/door.mp3")
+                door_sound.set_volume(0.7)
                 door_sound.play()
                 obj.kill()
                 objects.append(Door(12 * 96, (HEIGHT - 96) - 64, 64, 32, 0))
@@ -366,7 +449,7 @@ def pillTouch(player, pill, objects):
         #objects.remove(obj)
         gulp_sound = mixer.Sound("assets/gulp.mp3")
         gulp_sound.play()
-        pill.move(306, -60)
+        pill.move(5000, 5000)
         if level == 1:
             objects.append(Door(12 * 96, (HEIGHT - 96) - 64, 64, 0, 0))
         if level == 2:
@@ -376,9 +459,16 @@ def pillTouch(player, pill, objects):
         if level == 4:
             objects.append(Door(11 * 96, (HEIGHT - 96) - 446, 64, 0, 0))
             rock_sound = mixer.Sound("assets/rock.mp3")
+            rock_sound.set_volume(0.3)
             rock_sound.play()
             objects.remove(objects[-2])
-    
+        if level == 5:
+            rock_sound = mixer.Sound("assets/rock.mp3")
+            rock_sound.set_volume(0.3)
+            rock_sound.play()
+            for i in range(0,3):
+                objects.remove(objects[-1])
+
             
 def handle_move(player, objects):
     keys = pygame.key.get_pressed()
@@ -437,8 +527,9 @@ def main(window):
     objects.append(Block(3 * block_size, (HEIGHT - block_size * 3) - 180, 96, 34, 192, 64),) #Grey Poly Brick Straight
     
     offset_x = 0
+    offset_y = 0
     scroll_area_width = 100
-
+    scroll_area_height = 150
 
     run = True
     while run:
@@ -457,21 +548,24 @@ def main(window):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and player.jump_count < 2:
                     jump_sound = mixer.Sound("assets/jump.mp3")
+                    jump_sound.set_volume(0.5)
                     jump_sound.play()
                     player.jump()
-            
 
-
-            
         player.loop(FPS)
         pill.loop()
         handle_move(player, objects)
         doorTouch(player, pill, objects)
         pillTouch(player, pill, objects)
-        draw(window, background, bg_image, player, objects, pill, offset_x)      
+        draw(window, background, bg_image, player, objects, pill, offset_x, offset_y)      
 
         if((player.rect.right - offset_x >= WIDTH - scroll_area_width and player.x_vel > 0)) or ((player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
-            offset_x += player.x_vel  
+            if finished <= 0:
+                offset_x += player.x_vel  
+        
+        if((player.rect.top - offset_y >= HEIGHT - scroll_area_height and player.y_vel > 0)) or ((player.rect.bottom - offset_y <= scroll_area_height) and player.y_vel < 0):
+            if finished <= 0:
+                offset_y += player.y_vel
         
 
     pygame.quit()
