@@ -7,5 +7,5 @@ This project is complete and will not be worked on any further 🙅
 - "techwithtim" for their basic movement code tutorial
 - "Pixel Frog" for **MOST** of their assets on itch.io (Pill and Door assets were made by myself)
 - "Pixaby" for their royalty free audio tracks / sfx
--  You!🫵 for playing this game!
+-  You! Thank you for playing this game! ❤️
 
