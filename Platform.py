@@ -10,7 +10,6 @@ pygame.init()
 
 pygame.display.set_caption("Schizophrenia Lvl 1") #name of the window (initial)
 level = 1
-finished = 0
 
 #Background Music
 mixer.music.load("assets/bgm.mp3")
@@ -224,8 +223,8 @@ def draw(window, background, bg_image, player, objects, pill, offset_x, offset_y
     pill.draw(window, offset_x, offset_y)
 
     player.draw(window, offset_x, offset_y)
-
-    pygame.display.update()
+    if level != 6:
+        pygame.display.update()
 
 def handle_vertical_collision(player, objects, dy):
     collided_objects = []
@@ -254,9 +253,12 @@ def collide(player, objects, dx):
     player.update()
     return collided_object
 
-def draw_text(text, font, color):
+def draw_text(text, font, color, small):
     box = font.render(text, True, color)
-    window.blit(box, box.get_rect(center = window.get_rect().center))
+    if small == False:
+        window.blit(box, box.get_rect(center = window.get_rect().center))
+    else:
+        window.blit(box, box.get_rect(center=(WIDTH/2, (HEIGHT/2) + 40)))
     pygame.display.flip()
 
 def levelChange(player, pill, objects):
@@ -423,9 +425,9 @@ def levelChange(player, pill, objects):
         pygame.display.set_caption("Schizophrenia End")
         window.fill("black")
         text_font = pygame.font.Font('assets/font.otf', 36)
-        global finished
-        finished += 1
-        draw_text("Thank you for playing", text_font, (255, 255, 255))
+        text_font_small = pygame.font.Font('assets/font.otf', 24)
+        draw_text("Thank You For Playing", text_font, (255, 255, 255), False)
+        draw_text("(this game is a small project for fun, expect bugs and poorly optimized code)", text_font_small, (255,255,255), True)
 
 
 
@@ -560,12 +562,10 @@ def main(window):
         draw(window, background, bg_image, player, objects, pill, offset_x, offset_y)      
 
         if((player.rect.right - offset_x >= WIDTH - scroll_area_width and player.x_vel > 0)) or ((player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
-            if finished <= 0:
-                offset_x += player.x_vel  
+            offset_x += player.x_vel  
         
         if((player.rect.top - offset_y >= HEIGHT - scroll_area_height and player.y_vel > 0)) or ((player.rect.bottom - offset_y <= scroll_area_height) and player.y_vel < 0):
-            if finished <= 0:
-                offset_y += player.y_vel
+            offset_y += player.y_vel
         
 
     pygame.quit()
