@@ -3,6 +3,10 @@ This game was just a small project and is **NOT** optimized. Expect bad code and
 
 This project is complete and will not be worked on any further 🙅
 
+---
+![preview](https://github.com/user-attachments/assets/13570915-1320-4ce4-aa17-d37ba6b19f5a)
+---
+
 ## <ins>Controls</ins>
 - Left + Right Arrow Keys to move left and right
 - Up Arrow to enter doors
