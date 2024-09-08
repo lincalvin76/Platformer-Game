@@ -5,7 +5,6 @@ This project is complete and will not be worked on any further 🙅
 
 ---
 ![preview](https://github.com/user-attachments/assets/13570915-1320-4ce4-aa17-d37ba6b19f5a)
----
 
 ## <ins>Controls</ins>
 - Left + Right Arrow Keys to move left and right
