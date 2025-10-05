@@ -8,7 +8,7 @@ from pygame import mixer
 pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.init()
 
-pygame.display.set_caption("Schizophrenia Lvl 1") #name of the window (initial)
+pygame.display.set_caption("Lvl 1") #name of the window (initial)
 level = 1
 
 #Background Music
@@ -267,7 +267,7 @@ def levelChange(player, pill, objects):
 
     if level == 2:
         player.move(-1000,0)
-        pygame.display.set_caption("Schizophrenia Lvl 2")
+        pygame.display.set_caption("Lvl 2")
         for i in range(0, 15):
             objects.append(Block(i * block_size, HEIGHT - block_size, block_size, block_size, 0, 0),) #Floor
         for i in range(2, 9):
@@ -292,7 +292,7 @@ def levelChange(player, pill, objects):
 
     if level == 3:
         player.move(10,0)
-        pygame.display.set_caption("Schizophrenia Lvl 3")
+        pygame.display.set_caption("Lvl 3")
         for i in range(0, 15):
             objects.append(Block(i * block_size, HEIGHT - block_size, block_size, block_size, 0, 0),) #Floor
         for i in range(2, 9):
@@ -322,7 +322,7 @@ def levelChange(player, pill, objects):
 
     if level == 4:
         player.move(100,0)
-        pygame.display.set_caption("Schizophrenia Lvl 4")
+        pygame.display.set_caption("Lvl 4")
         for i in range(0, 15):
             objects.append(Block(i * block_size, HEIGHT - block_size, block_size, block_size, 0, 0),) #Floor
         for i in range(2, 9):
@@ -422,7 +422,7 @@ def levelChange(player, pill, objects):
         mixer.music.load("assets/end.mp3")
         mixer.music.set_volume(0.5)
         mixer.music.play(-1)
-        pygame.display.set_caption("Schizophrenia End")
+        pygame.display.set_caption("End")
         window.fill("black")
         text_font = pygame.font.Font('assets/font.otf', 36)
         text_font_small = pygame.font.Font('assets/font.otf', 24)
